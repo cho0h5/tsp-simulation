@@ -21,14 +21,15 @@ impl TSP {
                 x: rng.random_range(min..max),
                 y: rng.random_range(min..max),
             })
-        .collect();
+            .collect();
 
         Self { points }
     }
 
     fn euclidean_distance(&self, i: usize, j: usize) -> f32 {
-        ((self.points[j].x as f32 - self.points[i].x as f32).powf(2.0) +
-         (self.points[j].y as f32 - self.points[i].y as f32).powf(2.0)).sqrt()
+        ((self.points[j].x as f32 - self.points[i].x as f32).powf(2.0)
+            + (self.points[j].y as f32 - self.points[i].y as f32).powf(2.0))
+        .sqrt()
     }
 }
 
@@ -39,7 +40,10 @@ struct Greedy<'a> {
 
 impl<'a> Greedy<'a> {
     fn new(tsp: &'a TSP) -> Self {
-        Self { tsp, path: Vec::new() }
+        Self {
+            tsp,
+            path: Vec::new(),
+        }
     }
 
     fn search(&mut self) {
@@ -83,12 +87,78 @@ impl<'a> Greedy<'a> {
             open_len += self.tsp.euclidean_distance(w[0], w[1]);
         }
 
-        open_len + self.tsp.euclidean_distance(*self.path.last().unwrap(), *self.path.first().unwrap())
+        open_len
+            + self
+                .tsp
+                .euclidean_distance(*self.path.last().unwrap(), *self.path.first().unwrap())
+    }
+}
+
+struct DFS<'a> {
+    tsp: &'a TSP,
+    best_path: Vec<usize>,
+    best_cost: f32,
+    path: Vec<usize>,
+    visited: Vec<bool>,
+}
+
+impl<'a> DFS<'a> {
+    fn new(tsp: &'a TSP) -> Self {
+        let n = tsp.points.len();
+        Self {
+            tsp,
+            best_path: Vec::new(),
+            best_cost: f32::INFINITY,
+            path: Vec::with_capacity(n + 1),
+            visited: vec![false; n],
+        }
+    }
+
+    fn search(&mut self) {
+        let mut rng = rand::rng();
+        let start = rng.random_range(0..self.tsp.points.len());
+
+        self.path.push(start);
+        self.visited[start] = true;
+
+        self.dfs(start, 1, 0.0, start);
+
+        println!("{:?}: {}", self.best_path, self.best_cost);
+    }
+
+    fn dfs(&mut self, curr: usize, depth: usize, g: f32, start: usize) {
+        let n = self.tsp.points.len();
+
+        if depth == n {
+            let total = g + self.tsp.euclidean_distance(curr, start);
+            if total < self.best_cost {
+                self.best_cost = total;
+                self.best_path = self.path.clone();
+            }
+            return;
+        }
+
+        for v in 0..n {
+            if !self.visited[v] {
+                self.visited[v] = true;
+                self.path.push(v);
+
+                let g2 = g + self.tsp.euclidean_distance(curr, v);
+                self.dfs(v, depth + 1, g2, start);
+
+                self.path.pop();
+                self.visited[v] = false;
+            }
+        }
     }
 }
 
 fn main() {
-    let tsp = TSP::new(5, 0, 100);
+    let tsp = TSP::new(11, 0, 100);
+
     let mut greedy = Greedy::new(&tsp);
     greedy.search();
+
+    let mut dfs = DFS::new(&tsp);
+    dfs.search();
 }
