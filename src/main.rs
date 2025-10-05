@@ -1,5 +1,6 @@
 use rand::prelude::*;
 use std::collections::HashSet;
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 struct Point {
@@ -246,15 +247,31 @@ impl<'a> BranchAndBound<'a> {
     }
 }
 
+fn measure_time<T, F: FnOnce() -> T>(f: F) -> (T, Duration) {
+    let start = Instant::now();
+    let out = f();
+    let dur = start.elapsed();
+    (out, dur)
+}
+
 fn main() {
     let tsp = TSP::new(11, 0, 100);
 
-    let mut greedy = Greedy::new(&tsp);
-    greedy.search();
+    let (_, dur) = measure_time(|| {
+        let mut greedy = Greedy::new(&tsp);
+        greedy.search();
+    });
+    println!("Greedy: {:?}", dur);
 
-    let mut dfs = DFS::new(&tsp);
-    dfs.search();
+    let (_, dur) = measure_time(|| {
+        let mut dfs = DFS::new(&tsp);
+        dfs.search();
+    });
+    println!("DFS: {:?}", dur);
 
-    let mut branch_and_bound = BranchAndBound::new(&tsp);
-    branch_and_bound.search();
+    let (_, dur) = measure_time(|| {
+        let mut branch_and_bound = BranchAndBound::new(&tsp);
+        branch_and_bound.search();
+    });
+    println!("B&B: {:?}", dur);
 }
