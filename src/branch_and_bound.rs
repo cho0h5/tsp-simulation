@@ -15,7 +15,7 @@ impl<'a> BranchAndBound<'a> {
         let n = tsp.len();
 
         let mut min_outgoing = vec![0.0f32; n];
-        for i in 0..n {
+        for (i, item) in min_outgoing.iter_mut().enumerate().take(n) {
             let mut m = f32::INFINITY;
             for j in 0..n {
                 if i == j {
@@ -23,7 +23,7 @@ impl<'a> BranchAndBound<'a> {
                 }
                 m = m.min(tsp.euclidean_distance(i, j));
             }
-            min_outgoing[i] = if m.is_finite() { m } else { 0.0 };
+            *item = if m.is_finite() { m } else { 0.0 };
         }
 
         Self {

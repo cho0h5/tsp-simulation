@@ -19,7 +19,7 @@ fn measure_time<T, F: FnOnce() -> T>(f: F) -> (T, Duration) {
 }
 
 fn main() {
-    let tsp = TSP::new(100, 0, 100);
+    let tsp = TSP::new(11, 0, 100);
 
     let (_, dur) = measure_time(|| {
         let mut greedy = Greedy::new(&tsp);
@@ -27,17 +27,17 @@ fn main() {
     });
     println!("Greedy: {:?}", dur);
 
-    // let (_, dur) = measure_time(|| {
-    //     let mut dfs = DFS::new(&tsp);
-    //     dfs.search();
-    // });
-    // println!("DFS: {:?}", dur);
+    let (_, dur) = measure_time(|| {
+        let mut dfs = DFS::new(&tsp);
+        dfs.search();
+    });
+    println!("DFS: {:?}", dur);
 
-    // let (_, dur) = measure_time(|| {
-    //     let mut branch_and_bound = BranchAndBound::new(&tsp);
-    //     branch_and_bound.search();
-    // });
-    // println!("B&B: {:?}", dur);
+    let (_, dur) = measure_time(|| {
+        let mut branch_and_bound = BranchAndBound::new(&tsp);
+        branch_and_bound.search();
+    });
+    println!("B&B: {:?}", dur);
 
     let (_, dur) = measure_time(|| {
         let mut hill_climbing = HillClimbing::new(&tsp);
